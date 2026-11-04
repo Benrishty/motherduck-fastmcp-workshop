@@ -4,7 +4,7 @@
 
 ## The brief
 
-Give your agent tools that answer any question about this week's 311 data in three tool calls or fewer.
+Give your agent tools that answer questions about this week's 311 data, starting with the room challenge.
 
 Your coding agent writes the code.
 Your job is the design: which tools exist, what each one returns, and how the docstrings steer the model.
@@ -51,9 +51,7 @@ An unknown service or neighborhood raises a `ToolError` that suggests the closes
 
 3. When the answer is right, the room server asks whether to post your handle to the room screen.
    Say yes. Your handle appears on the projector.
-4. Open **Logs** for your server and count the `tools/call` rows for this question.
-   Three or fewer meets the brief.
-   More than three usually means a docstring sent the model to the wrong tool, or a tool returned too little in one call.
+4. Open **Logs** for your server and find the calls the agent made to answer. That row is the only record of what your agent did with your data, and it is where you look when an answer is wrong.
 
 Claude Desktop cannot show the confirmation form.
 There, tell the agent to pass `post_to_screen=true` to `submit_answer`.
