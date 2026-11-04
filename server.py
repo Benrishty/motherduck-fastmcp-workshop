@@ -3,6 +3,8 @@
 FastMCP Gateway runs this file. Its entrypoint setting is `server.py:mcp`.
 """
 
+import logging
+import re
 from collections import Counter, defaultdict
 from statistics import median
 from typing import Literal
@@ -11,8 +13,11 @@ from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 
 from sf311.data import BY_ID, LOCAL_NAMES, NEIGHBORHOODS, REQUESTS, SERVICES, Request, closest
+from sf311.kit import caller_email
 
 mcp = FastMCP("sf-311")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+log = logging.getLogger("sf311")
 
 MAX_ROWS = 50
 MIN_CLOSED_FOR_MEDIAN = 10
@@ -37,6 +42,28 @@ def _check(value: str | None, choices: list[str], kind: str) -> None:
     raise ToolError(f"Unknown {kind} {value!r}.{hint} Call dataset_info for the exact {kind} names.")
 
 
+HOUSE_NUMBER = re.compile(r"^(\d+)\s+([^,]+)")
+
+
+def _mask_address(address: str) -> str:
+    """Cut an address to its block: "994 HARRISON ST, ..." -> "900 block of HARRISON ST".
+
+    Addresses without a house number, such as intersections, are returned unchanged.
+    """
+    match = HOUSE_NUMBER.match(address)
+    if not match:
+        return address
+    block = int(match.group(1)) // 100 * 100
+    return f"{block} block of {match.group(2).strip()}"
+
+
+def _public(request: Request) -> dict:
+    """The request as a dict, with the address masked to the block."""
+    row = request.as_dict()
+    row["address"] = _mask_address(row["address"])
+    return row
+
+
 def _matching(service: str | None = None, neighborhood: str | None = None, status: str | None = None) -> list[Request]:
     _check(service, SERVICES, "service")
     _check(neighborhood, NEIGHBORHOODS, "neighborhood")
@@ -49,12 +76,81 @@ def _matching(service: str | None = None, neighborhood: str | None = None, statu
     ]
 
 
+COLUMNS_URI = "sf311://columns"
+
+COLUMNS = {
+    "request_id": {
+        "csv_column": "service_request_id",
+        "meaning": "The request's ID. Pass it to get_request.",
+    },
+    "opened": {
+        "csv_column": "requested_datetime",
+        "meaning": "When the request was opened, ISO 8601 in San Francisco local time.",
+    },
+    "closed": {
+        "csv_column": "closed_date",
+        "meaning": "When it was closed, ISO 8601 local time. null while the request is open.",
+    },
+    "status": {
+        "csv_column": "status_description",
+        "meaning": "Open or Closed.",
+    },
+    "service": {
+        "csv_column": "service_name",
+        "meaning": "What the request is about, such as Graffiti Public. Exact names come from dataset_info.",
+    },
+    "subtype": {
+        "csv_column": "service_subtype",
+        "meaning": "A finer category within the service.",
+    },
+    "agency": {
+        "csv_column": "agency_responsible",
+        "meaning": "The city team that owns the request.",
+    },
+    "neighborhood": {
+        "csv_column": "analysis_neighborhood",
+        "meaning": "One of the city's 41 official neighborhoods, or empty when unknown.",
+    },
+    "local_name": {
+        "csv_column": "neighborhoods_sffind_boundaries",
+        "meaning": "The name people use for the area, such as Lower Nob Hill. One name can span several official neighborhoods.",
+    },
+    "address": {
+        "csv_column": "address",
+        "meaning": "Where the problem is, only to the block, such as 900 block of HARRISON ST. Intersections are shown as they are.",
+    },
+    "source": {
+        "csv_column": "source",
+        "meaning": "How it was filed: Mobile, Web, Phone, Integrated Agency, Twitter, or Email.",
+    },
+}
+
+
+@mcp.resource(
+    COLUMNS_URI,
+    name="columns",
+    description="What each field in a 311 request means, as returned by search_requests and get_request.",
+    mime_type="application/json",
+)
+def columns() -> dict:
+    """Describe every field of a 311 request and the CSV column it comes from."""
+    return {
+        "fields": COLUMNS,
+        "notes": [
+            "Each row is one report a resident filed with the city during one week in October 2026.",
+            "count_requests can group by neighborhood, service, agency, source, weekday (of opened), or status.",
+            "median_close_hours uses only closed requests: hours from opened to closed.",
+        ],
+    }
+
+
 @mcp.tool(annotations=READ_ONLY)
 def dataset_info() -> dict:
     """Describe the 311 dataset this server answers questions about.
 
     Call this first to learn the date range and the exact service and
-    neighborhood names that other tools accept.
+    neighborhood names that other tools accept. For what each field of a
+    request means, read the resource named in columns_resource.
     """
     return {
         "description": "San Francisco 311 service requests filed in one week.",
@@ -64,6 +160,7 @@ def dataset_info() -> dict:
         "services": SERVICES,
         "neighborhoods": NEIGHBORHOODS,
         "local_neighborhood_names": len(LOCAL_NAMES),
+        "columns_resource": COLUMNS_URI,
     }
 
 
@@ -134,7 +231,8 @@ def search_requests(
 ) -> list[dict]:
     """List individual 311 requests, newest first.
 
-    Use this to see examples: addresses, subtypes, timestamps, request ids.
+    Use this to see examples: addresses (to the block only), subtypes,
+    timestamps, request ids.
     Returns at most `limit` rows (1 to 50), so never use it to count or rank;
     use count_requests for that. service and neighborhood must be exact names
     from dataset_info. Pass a returned request_id to get_request for one
@@ -143,20 +241,23 @@ def search_requests(
     if not 1 <= limit <= MAX_ROWS:
         raise ToolError(f"limit must be between 1 and {MAX_ROWS}. To count requests, use count_requests instead.")
     rows = sorted(_matching(service, neighborhood, status), key=lambda r: r.opened, reverse=True)
-    return [r.as_dict() for r in rows[:limit]]
+    return [_public(r) for r in rows[:limit]]
 
 
 @mcp.tool(annotations=READ_ONLY)
 def get_request(request_id: str) -> dict:
     """Get one 311 request by its request_id, with every field.
 
+    The address is given only to the block, such as 900 block of HARRISON ST.
+
     Use this when you already have an id, for example from search_requests.
     To find requests by service or neighborhood, use search_requests.
     """
+    log.info("get_request %s by %s", request_id, caller_email() or "local")
     request = BY_ID.get(request_id.strip())
     if request is None:
         raise ToolError(f"No request with id {request_id!r}. Use search_requests to find request ids.")
-    return request.as_dict()
+    return _public(request)
 
 
 if __name__ == "__main__":
