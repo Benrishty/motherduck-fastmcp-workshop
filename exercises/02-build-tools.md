@@ -58,9 +58,31 @@ An unknown service or neighborhood raises a `ToolError` that suggests the closes
 Claude Desktop cannot show the confirmation form.
 There, tell the agent to pass `post_to_screen=true` to `submit_answer`.
 
+## Climb the tiers
+
+The room server has four tiers of challenge, and each one needs a kind of tool the last one did not.
+Ask for the next tier when your handle is on the screen:
+
+```text
+Get my tier 2 room challenge. My handle is <your-handle>.
+```
+
+| Tier | What the questions need | Example |
+| --- | --- | --- |
+| 1 | One aggregate | Which agency handled the most Streetlights requests? |
+| 2 | Two steps: a filter, then a ranking | Which neighborhood closed Encampment requests fastest, counting only neighborhoods with at least 10 closed? |
+| 3 | A tool the four above cannot replace | At which hour of the day were the most Noise requests opened? How many Graffiti requests are still open? |
+| 4 | Local neighborhood names, which can span several official ones | How many requests were filed in Lower Nob Hill, counting all of it? |
+
+Tier 3 is the design exercise.
+Read the question, decide what tool would answer it in one call, have your agent build it, push, wait for `Live`, reconnect, and try.
+There is no required shape: name it, pick its arguments, and write the docstring so the model chooses it.
+Keep results small and read-only, and keep the Exercise 2 tests passing.
+
+Tier 4 waits for Exercise 4, where you build the local-name logic.
+
 ## Stretch goals
 
-- Ask for a harder challenge: `Get my tier 2 room challenge.` These take two steps.
 - Add a resource that describes the dataset's columns, and check whether the model reads it.
 - Open a pull request instead of pushing to main. FastMCP Gateway builds it at its own preview URL, so you can test a change before it reaches your main URL.
 

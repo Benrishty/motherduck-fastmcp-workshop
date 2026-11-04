@@ -56,6 +56,17 @@ It fails on FastMCP Gateway, and `AGENTS.md` tells your agent not to use it.
 Cursor and Claude Desktop may not show the form.
 There, ask the agent to pass `boundary`, for example `boundary="Tenderloin"`, or run the tool from **Playground** in FastMCP Gateway.
 
+## Tier 4
+
+Your tool now knows local names, so ask the room server for the last tier:
+
+```text
+Get my tier 4 room challenge. My handle is <your-handle>.
+```
+
+These questions are about a local name that spans several official neighborhoods: how many requests it had in all, which official neighborhood holds the largest share, or how many fall inside one part.
+If `count_in_neighborhood` cannot answer yours in one call, extend it, or add a tool beside it.
+
 ## Stretch goals
 
 - Ask about `Duboce Triangle` or `Civic Center`, which each overlap three official neighborhoods.
