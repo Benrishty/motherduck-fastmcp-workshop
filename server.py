@@ -49,12 +49,81 @@ def _matching(service: str | None = None, neighborhood: str | None = None, statu
     ]
 
 
+COLUMNS_URI = "sf311://columns"
+
+COLUMNS = {
+    "request_id": {
+        "csv_column": "service_request_id",
+        "meaning": "The request's ID. Pass it to get_request.",
+    },
+    "opened": {
+        "csv_column": "requested_datetime",
+        "meaning": "When the request was opened, ISO 8601 in San Francisco local time.",
+    },
+    "closed": {
+        "csv_column": "closed_date",
+        "meaning": "When it was closed, ISO 8601 local time. null while the request is open.",
+    },
+    "status": {
+        "csv_column": "status_description",
+        "meaning": "Open or Closed.",
+    },
+    "service": {
+        "csv_column": "service_name",
+        "meaning": "What the request is about, such as Graffiti Public. Exact names come from dataset_info.",
+    },
+    "subtype": {
+        "csv_column": "service_subtype",
+        "meaning": "A finer category within the service.",
+    },
+    "agency": {
+        "csv_column": "agency_responsible",
+        "meaning": "The city team that owns the request.",
+    },
+    "neighborhood": {
+        "csv_column": "analysis_neighborhood",
+        "meaning": "One of the city's 41 official neighborhoods, or empty when unknown.",
+    },
+    "local_name": {
+        "csv_column": "neighborhoods_sffind_boundaries",
+        "meaning": "The name people use for the area, such as Lower Nob Hill. One name can span several official neighborhoods.",
+    },
+    "address": {
+        "csv_column": "address",
+        "meaning": "Where the problem is.",
+    },
+    "source": {
+        "csv_column": "source",
+        "meaning": "How it was filed: Mobile, Web, Phone, Integrated Agency, Twitter, or Email.",
+    },
+}
+
+
+@mcp.resource(
+    COLUMNS_URI,
+    name="columns",
+    description="What each field in a 311 request means, as returned by search_requests and get_request.",
+    mime_type="application/json",
+)
+def columns() -> dict:
+    """Describe every field of a 311 request and the CSV column it comes from."""
+    return {
+        "fields": COLUMNS,
+        "notes": [
+            "Each row is one report a resident filed with the city during one week in October 2026.",
+            "count_requests can group by neighborhood, service, agency, source, weekday (of opened), or status.",
+            "median_close_hours uses only closed requests: hours from opened to closed.",
+        ],
+    }
+
+
 @mcp.tool(annotations=READ_ONLY)
 def dataset_info() -> dict:
     """Describe the 311 dataset this server answers questions about.
 
     Call this first to learn the date range and the exact service and
-    neighborhood names that other tools accept.
+    neighborhood names that other tools accept. For what each field of a
+    request means, read the resource named in columns_resource.
     """
     return {
         "description": "San Francisco 311 service requests filed in one week.",
@@ -64,6 +133,7 @@ def dataset_info() -> dict:
         "services": SERVICES,
         "neighborhoods": NEIGHBORHOODS,
         "local_neighborhood_names": len(LOCAL_NAMES),
+        "columns_resource": COLUMNS_URI,
     }
 
 
