@@ -53,8 +53,8 @@ It fails on FastMCP Gateway, and `AGENTS.md` tells your agent not to use it.
 2. Open **Logs**.
    You see two `count_in_neighborhood` rows for one question: the first returned the question, and the second returned the count.
 
-Cursor and Claude Desktop may not show the form.
-There, ask the agent to pass `boundary`, for example `boundary="Tenderloin"`, or run the tool from **Playground** in FastMCP Gateway.
+Claude Desktop does not show the form: it declines it, your tool returns its no-choice message, and the agent calls again with `boundary="all"` on its own.
+To pick a part, tell it which: `boundary="Tenderloin"`. Cursor may behave the same way. You can also run the tool from **Playground** in FastMCP Gateway.
 
 ## The Exercise 4 challenge
 

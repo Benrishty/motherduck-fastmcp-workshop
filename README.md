@@ -68,7 +68,7 @@ Open your server, select **Connect**, and pick your client.
 | --- | --- | --- |
 | Claude Code | `claude mcp add --scope local --transport http sf-311 <your URL>`, then `/mcp` to sign in. | `claude mcp add --scope local --transport http room https://motherduck-control-center.fastmcp.app/mcp` |
 | Cursor | Use the `cursor://` link in the **Connect** dialog. | Add `{"mcpServers": {"room": {"url": "https://motherduck-control-center.fastmcp.app/mcp"}}}` to `~/.cursor/mcp.json`. |
-| Claude Desktop | Select **Add to Claude Desktop** in the **Connect** dialog, and open the downloaded `.mcpb` file. | In **Settings**, then **Developer**, then **Edit Config**, add the room server with `"url"` and `"transport": "http"`, then restart Claude Desktop. |
+| Claude Desktop | Select **Add to Claude Desktop** in the **Connect** dialog, and open the downloaded `.mcpb` file. Desktop asks you to allow each tool call; choose **Always allow** for your server. | In **Settings**, then **Developer**, then **Edit Config**, add the room server with `"url"` and `"transport": "http"`, then restart Claude Desktop. |
 
 The room server needs no sign-in.
 
@@ -83,7 +83,7 @@ The room server needs no sign-in.
 | A call returns `404`. | The URL is wrong, or the first build is not `Live` yet. | Copy the URL from the **Deployments** page and wait for `Live`. |
 | New tools do not appear after a push. | The client cached the old tool list, or the new build is not live yet. | Wait for `Live`, then reconnect with `/mcp`. |
 | Tests pass locally, but the deployed tool fails. | The code depends on something only on your laptop. | Open **Server logs** on the **Deployments** page for the error. |
-| No form appears in Exercise 4. | Your client does not support elicitation, or the tool calls `ctx.elicit()`. | Use Claude Code, or pass `boundary`. Run `tests/test_ex4.py`, which catches `ctx.elicit()`. |
+| No form appears in Exercise 4. | Claude Desktop declines forms automatically, and Cursor may too; or the tool calls `ctx.elicit()`. | Claude Desktop works around it on its own by passing `boundary`. Otherwise use Claude Code, or tell the agent to pass `boundary`. Run `tests/test_ex4.py`, which catches `ctx.elicit()`. |
 | The first call after a deploy is slow. | The new deployment is starting. | Wait a few seconds and try again. |
 
 ## After the workshop
