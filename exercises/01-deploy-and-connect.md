@@ -64,7 +64,7 @@ The goal is to get the slow, one-time steps done first: signing in, giving FastM
    Get my room challenge. My handle is <your-handle>.
    ```
 
-   Keep the question it returns. You answer it in Exercise 2.
+   It returns the Exercise 2 challenge. Keep the question; you answer it in Exercise 2, and each later exercise has its own.
 
 ## Prove it
 

@@ -42,6 +42,21 @@ The DataSF terms forbid using this data to identify people, and a model does not
 5. Ask for another request's details, then open the new `get_request` row in **Logs**.
    The row is there, but its response payload is not stored.
 
+## The Exercise 3 challenge
+
+This one is the design exercise.
+Ask for it:
+
+```text
+Get my Exercise 3 room challenge. My handle is <your-handle>.
+```
+
+The question cannot be answered by the four tools from Exercise 2: which hour of the day had the most requests, how many are still open, the longest time any request took to close, which service has the widest gap between its fastest and slowest neighborhoods, which neighborhood files the most by phone.
+Read the question, decide what tool would answer it in one call, and have your agent build it.
+There is no required shape: name it, choose its arguments, and write the docstring so the model picks it.
+Keep results small and read-only, keep addresses masked, and keep the earlier tests passing.
+Push, wait for `Live`, reconnect with `/mcp`, and ask your agent to solve it.
+
 ## Stretch goals
 
 - Ask your agent for `get_request` on an ID from another neighborhood, and check that the log line still shows your email.

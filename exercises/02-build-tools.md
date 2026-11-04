@@ -46,7 +46,7 @@ An unknown service or neighborhood raises a `ToolError` that suggests the closes
 2. Type `/clear` to start a fresh conversation, then ask:
 
    ```text
-   Solve my room challenge using only the sf-311 and room MCP tools. My handle is <your-handle>.
+   Solve my Exercise 2 room challenge using only the sf-311 and room MCP tools. My handle is <your-handle>.
    ```
 
 3. When the answer is right, the room server asks whether to post your handle to the room screen.
@@ -55,29 +55,6 @@ An unknown service or neighborhood raises a `ToolError` that suggests the closes
 
 Claude Desktop cannot show the confirmation form.
 There, tell the agent to pass `post_to_screen=true` to `submit_answer`.
-
-## Climb the tiers
-
-The room server has four tiers of challenge, and each one needs a kind of tool the last one did not.
-Ask for the next tier when your handle is on the screen:
-
-```text
-Get my tier 2 room challenge. My handle is <your-handle>.
-```
-
-| Tier | What the questions need | Example |
-| --- | --- | --- |
-| 1 | One aggregate | Which agency handled the most Streetlights requests? |
-| 2 | Two steps: a filter, then a ranking | Which neighborhood closed Encampment requests fastest, counting only neighborhoods with at least 10 closed? |
-| 3 | A tool the four above cannot replace | At which hour of the day were the most Noise requests opened? How many Graffiti requests are still open? |
-| 4 | Local neighborhood names, which can span several official ones | How many requests were filed in Lower Nob Hill, counting all of it? |
-
-Tier 3 is the design exercise.
-Read the question, decide what tool would answer it in one call, have your agent build it, push, wait for `Live`, reconnect, and try.
-There is no required shape: name it, pick its arguments, and write the docstring so the model chooses it.
-Keep results small and read-only, and keep the Exercise 2 tests passing.
-
-Tier 4 waits for Exercise 4, where you build the local-name logic.
 
 ## Stretch goals
 

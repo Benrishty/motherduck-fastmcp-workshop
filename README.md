@@ -33,9 +33,9 @@ They take about ten minutes, and the room wifi will thank you.
 | # | Exercise | Time | You finish with |
 | --- | --- | --- | --- |
 | 1 | [Deploy and connect](exercises/01-deploy-and-connect.md) | 20 min | Your server live at its own URL, and your room challenge. |
-| 2 | [Build tools for your agent](exercises/02-build-tools.md) | 25 min | Tools that answer the room challenges, your handle on the room screen, and a tool of your own design for tier 3. |
-| 3 | [Mask and observe](exercises/03-mask-and-observe.md) | 15 min | Masked addresses, a caller in every log line, and payload logging turned off. |
-| 4 | [Ask with elicitation](exercises/04-ask-with-elicitation.md) | 15 min | A tool that asks which neighborhood you mean, and the tier 4 challenge. |
+| 2 | [Build tools for your agent](exercises/02-build-tools.md) | 20 min | Tools that answer the Exercise 2 room challenge, and your handle on the room screen. |
+| 3 | [Mask and observe](exercises/03-mask-and-observe.md) | 20 min | Masked addresses, a caller in every log line, payload logging turned off, and a tool of your own design for the Exercise 3 challenge. |
+| 4 | [Ask with elicitation](exercises/04-ask-with-elicitation.md) | 15 min | A tool that asks which neighborhood you mean, and the Exercise 4 challenge. |
 
 Each exercise is a brief for your coding agent, plus a check you do yourself in FastMCP Gateway.
 The tests in `tests/` decide when an exercise is done. You never write tests.
